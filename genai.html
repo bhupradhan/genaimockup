@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RadAI Assistant Interactive Demo</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f9fafb; color:#333; }
+header{text-align:center;margin-bottom:20px;}
+header h1{font-size:28px;margin:0;}
+header p{color:#555;}
+.grid{display:flex;gap:20px;margin-bottom:20px;}
+.card{background:#fff;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex:1;}
+.card h2{margin-top:0;font-size:16px;}
+.chat{background:#fff;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);margin-bottom:10px;max-height:400px;overflow-y:auto;}
+.msg{margin:8px 0;padding:8px 12px;border-radius:10px;max-width:75%;}
+.doctor{background:#e0e0e0;align-self:flex-start;}
+.bot{background:#1e40af;color:#fff;align-self:flex-end;}
+.chat-container{display:flex;flex-direction:column;}
+.input-area{display:flex;margin-top:10px;}
+.input-area input{flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;margin-right:10px;}
+.input-area button{padding:8px 14px;border-radius:6px;border:none;background:#2563eb;color:#fff;cursor:pointer;}
+.panel{background:#fff;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);margin:10px 0;display:none;}
+.panel-step{border:1px solid #ccc;padding:10px;border-radius:8px;margin:5px 0;cursor:pointer; background:#f0f4ff;}
+.panel-step.active{background:#dbeafe;}
+.panel-step .content{display:none;margin-top:5px;padding-left:10px;color:#333;}
+.panel-step .content p{margin:2px 0;}
+.cta{text-align:center;margin:20px 0;}
+.cta button{background:#2563eb;color:#fff;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;}
+.cta p{font-size:12px;color:#555;margin-top:5px;}
+.assumptions{font-size:14px;}
+.assumptions ul{padding-left:20px;}
+.ethics{font-size:12px;text-align:center;color:#666;font-style:italic;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🩺 RadAI Assistant</h1>
+<p>Smarter chest X-ray insights, faster diagnostics.</p>
+</header>
+
+<div class="grid">
+<div class="card">
+<h2>Problem</h2>
+<p>Pneumonia detection is delayed due to high radiology workload in hospitals.</p>
+</div>
+<div class="card">
+<h2>User</h2>
+<p>Dr. Ananya Sharma, Radiologist at City General Hospital.</p>
+</div>
+</div>
+
+<div class="chat chat-container" id="chatBox">
+<div class="msg bot">Bot: Hello Dr. Ananya! How can I assist with chest X-ray analysis today?</div>
+</div>
+
+<div class="input-area">
+<input type="text" id="userInput" placeholder="Type your message...">
+<button onclick="sendMessage()">Send</button>
+</div>
+
+<!-- Interactive Agent Plan -->
+<div class="panel" id="agentPanel">
+<h2>📋 Agent Plan</h2>
+<div class="panel-step" onclick="toggleStep(0)">
+<strong>Step 1: Plan</strong>
+<div class="content">
+<p>Identify pneumonia signs → Compare past vs current scan → Suggest follow-up.</p>
+<p><em>Action: AI identifies consolidations and marks regions on X-ray.</em></p>
+</div>
+</div>
+<div class="panel-step" onclick="toggleStep(1)">
+<strong>Step 2: Action</strong>
+<div class="content">
+<p>Retrieve last scan, run AI analysis, apply differential model.</p>
+<p><em>Result: AI produces multi-pathology detection and segmentation map.</em></p>
+</div>
+</div>
+<div class="panel-step" onclick="toggleStep(2)">
+<strong>Step 3: Result</strong>
+<div class="content">
+<p>Generate comparative summary + recommend next step.</p>
+<p><em>Result: Follow-up plan and diagnostic summary ready for doctor review.</em></p>
+</div>
+</div>
+</div>
+<div style="text-align:center; margin-top:10px;">
+<button onclick="togglePanel()">View Agent Plan</button>
+</div>
+
+<div class="cta">
+<button>Start Demo →</button>
+<p>Singh et al. (2024). Autonomous AI for Chest X-Ray Interpretation in India: A Multicenter Study. 
+<a href="https://doi.org/10.4103/ijri.ijri_2024_01" target="_blank">Link</a>
+</p>
+</div>
+
+<div class="card assumptions">
+<h2>📦 Top 3 Assumptions</h2>
+<ul>
+<li>Chest X-rays are already digitized and uploaded.</li>
+<li>Patient consent and anonymization are in place.</li>
+<li>API integration with hospital systems is available.</li>
+</ul>
+</div>
+
+<p class="ethics">🔒 Demo only—no real data stored; preferences/actions are mocked.</p>
+
+<script>
+const botResponses = {
+"summarize findings":"Findings suggest mild left lower lobe consolidation, consistent with early pneumonia.",
+"compare scans":"Compared to the prior scan, consolidation has reduced by 40%, indicating clinical improvement.",
+"next step":"Recommend follow-up imaging in 2 weeks to confirm resolution and monitor lung recovery."
+};
+
+function sendMessage(){
+const input = document.getElementById('userInput');
+const chatBox = document.getElementById('chatBox');
+const userText = input.value.trim();
+if(!userText) return;
+
+// append user message
+const userMsg = document.createElement('div');
+userMsg.className='msg doctor';
+userMsg.textContent=`Doctor: ${userText}`;
+chatBox.appendChild(userMsg);
+
+// determine bot response
+let response = "⚠️ Sorry, I cannot process that right now.";
+if(/summarize/i.test(userText)) response = botResponses["summarize findings"];
+else if(/compare/i.test(userText)) response = botResponses["compare scans"];
+else if(/next step/i.test(userText)) response = botResponses["next step"];
+
+// append bot message
+const botMsg = document.createElement('div');
+botMsg.className='msg bot';
+botMsg.textContent=`Bot: ${response}`;
+chatBox.appendChild(botMsg);
+
+chatBox.scrollTop=chatBox.scrollHeight;
+input.value='';
+input.focus();
+}
+
+// toggle panel
+function togglePanel(){
+const panel=document.getElementById('agentPanel');
+panel.style.display=panel.style.display==='block'?'none':'block';
+}
+
+// toggle individual step
+function toggleStep(index){
+const steps=document.querySelectorAll('.panel-step');
+const content=steps[index].querySelector('.content');
+content.style.display = content.style.display==='block'?'none':'block';
+steps[index].classList.toggle('active');
+}
+</script>
+
+</body>
+</html>
